@@ -1,3 +1,5 @@
+// Written by Nick. https//www.github.com/nsgwick/
+
 using System;
 using System.Collections.Generic;
 
@@ -8,20 +10,19 @@ namespace NaughtsAndCrosses
     {
         static void Main(string[] args)
         {
-            bool playAgain = true;
+            bool playAgain;
             int[] board;
             int size;
             int current;
             string choice;
-            int won;
+            int won, stop;
             do
             {
-                board = new int[] {};
-                size = 3;
+                setSize(out size);
                 current = 1;
                 won = -1;
                 board = empty(size);
-
+                stop = 0;
                 while(won < 0)
                 {
                     writeBoard(board, size);
@@ -29,24 +30,66 @@ namespace NaughtsAndCrosses
                     Console.WriteLine("Column, row (layout: n,n. E.g. 1,2)");
                     choice = Console.ReadLine();
                     //todo: validateChoice(choice)
-                    while (!processChoice(current, choice, out board, board, size))
+                    while (!processChoice(current, choice, out board, board, size, out stop))
                     {
                         Console.WriteLine("Invalid value.");
                         choice = Console.ReadLine();
                     }
+                    if (stop > 0)
+                        break;
+                        
                     current = current == 1 ? 2 : 1;
                     checkForWin(board, size, out won);
                 }
-                writeBoard(board, size);
-                Console.WriteLine(won == 0 ? "Draw!" : "The winner is player #" + won + "!");
-                Console.WriteLine("Do you want to play again? (y/n...)");
-                playAgain = Console.ReadKey().KeyChar == 'y';
+
+                if (stop == 2)
+                    break;
+                else if (stop == 1)
+                {
+                    playAgain = true;
+                }
+                else
+                {
+                    writeBoard(board, size);
+                    Console.WriteLine(won == 0 ? "Draw!" : "The winner is player #" + won + "!");
+                    Console.WriteLine("Do you want to play again? (y/n...)");
+                    playAgain = Console.ReadKey().KeyChar == 'y';
+                }
             } while (playAgain);
         }
-        static bool processChoice(int player, string choice, out int[] boardOut, int[] board, int size)
+
+        static void setSize(out int size)
+        {
+            Console.WriteLine("Choose board size (default 3, min. 3, max 9):");
+            if (!Int32.TryParse(Console.ReadLine(), out size))
+            {
+                size = 3;
+            }
+            else if (size > 9)
+            {
+                size = 9;
+            }
+            else if (size < 3)
+            {
+                size = 3;
+            }
+        }
+        static bool processChoice(int player, string choice, out int[] boardOut, int[] board, int size, out int stop)
         {
             int[] newBoard = board;
-            //split == 1,3
+            if (choice.ToLower().StartsWith("r"))
+            {
+                boardOut = newBoard;
+                stop = 1;
+                return true;
+            }
+            if (choice.ToLower().StartsWith("q"))
+            {
+                boardOut = newBoard;
+                stop = 2;
+                return true;
+            }
+            stop = 0;
             string[] split = choice.Split(',');
             if(split.Length < 2)
             {
@@ -58,28 +101,27 @@ namespace NaughtsAndCrosses
             if(!Int32.TryParse(split[1].Trim(), out row)) {
                 boardOut = newBoard;
                 return false;
-            } else if (!Int32.TryParse(split[0].Trim(), out col))
+            } 
+            else if (!Int32.TryParse(split[0].Trim(), out col))
             {
                 boardOut = newBoard;
                 return false;
             }
-            if(!((0 < row && row < 4) && (0 < col && col < 4)))
+            if(!((0 < row && row <= size) && (0 < col && col <= size)))
             {
                 boardOut = board;
                 return false;
             }
-            row-=1;
-            col-=1;
+            row--;
+            col--;
             int bidding = board[row * size + col];
             if(!checkForPlayer(bidding))
             {
                 newBoard.SetValue(player,(row * size) + col);
                 boardOut = newBoard;
                 return true;
-            } else
-            {
-                Console.WriteLine("That box is taken.");
-            }
+            } 
+            Console.WriteLine("That box is taken.");
             boardOut = board;
             return false;
         }
@@ -88,7 +130,8 @@ namespace NaughtsAndCrosses
         static void writeBoard(int[] board, int size)
         {
             Console.Clear();
-            string line, spacer = new string('-', (size * 5) - 1);
+            Console.WriteLine("Type r to restart or q to quit.\n");
+            string line, spacer = new string('-', (size * 4) + 2);
             for(int i = 1; i <= size; i++)
             {
                 Console.Write("---" + i);
@@ -122,12 +165,20 @@ namespace NaughtsAndCrosses
         }
         static bool checkForWin(int[] board, int size, out int winner)
         {
+            List<int> verticalSquares, horizontalSquares;
             for(int i = 0; i < size; i++)
             {
+                verticalSquares = new List<int>();
+                horizontalSquares = new List<int>();
+                for (int j = 0; j < size; j++)
+                {
+                    verticalSquares.Add(board[i + size * j]);
+                    horizontalSquares.Add(board[i + j]);
+                }
                 if (!checkForPlayer(board[i])) continue;
                 if ((size % (i + 1) == 0
-                    && squaresMatch(board[i], board[i + 1], board[i + 2]))
-                    || squaresMatch(board[i], board[i + size], board[i + (size * 2)]))
+                    && squaresMatch(horizontalSquares.ToArray()))
+                    || squaresMatch(verticalSquares.ToArray()))
                 {
                     winner = getChar(board[i]) == 'O' ? 1 : 2;
                     return true;
