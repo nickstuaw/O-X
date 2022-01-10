@@ -29,7 +29,6 @@ namespace NaughtsAndCrosses
                     Console.WriteLine("Turn: " + getChar(current));
                     Console.WriteLine("Column, row (layout: n,n. E.g. 1,2)");
                     choice = Console.ReadLine();
-                    //todo: validateChoice(choice)
                     while (!processChoice(current, choice, out board, board, size, out stop))
                     {
                         Console.WriteLine("Invalid value.");
@@ -37,7 +36,6 @@ namespace NaughtsAndCrosses
                     }
                     if (stop > 0)
                         break;
-                        
                     current = current == 1 ? 2 : 1;
                     checkForWin(board, size, out won);
                 }
@@ -77,6 +75,12 @@ namespace NaughtsAndCrosses
         static bool processChoice(int player, string choice, out int[] boardOut, int[] board, int size, out int stop)
         {
             int[] newBoard = board;
+            if (choice.ToLower().StartsWith("s"))
+            {
+                boardOut = newBoard;
+                stop = 0;
+                return true;
+            }
             if (choice.ToLower().StartsWith("r"))
             {
                 boardOut = newBoard;
@@ -130,7 +134,7 @@ namespace NaughtsAndCrosses
         static void writeBoard(int[] board, int size)
         {
             Console.Clear();
-            Console.WriteLine("Type r to restart or q to quit.\n");
+            Console.WriteLine("Type s to skip, r to restart or q to quit.\n");
             string line, spacer = new string('-', (size * 4) + 2);
             for(int i = 1; i <= size; i++)
             {
