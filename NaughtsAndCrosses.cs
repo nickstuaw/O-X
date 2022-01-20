@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 // Also known as Tic Tac Toe
 namespace NaughtsAndCrosses
@@ -30,18 +29,12 @@ namespace NaughtsAndCrosses
                         Console.WriteLine("Invalid value.");
                         choice = Console.ReadLine();
                     }
-                    if (stop > 0)
-                        break;
+                    if (stop > 0) break;
                     current = current == 1 ? 2 : 1;
                     CheckForWin(out won);
                 }
-
-                if (stop == 2)
-                    break;
-                if (stop == 1)
-                {
-                    playAgain = true;
-                }
+                if (stop == 2) break;
+                if (stop == 1) playAgain = true;
                 else
                 {
                     WriteBoard();
@@ -51,7 +44,6 @@ namespace NaughtsAndCrosses
                 }
             } while (playAgain);
         }
-
         private static void SetSize()
         {
             Console.WriteLine("Choose board size (default 3, min. 3, max 9):");
@@ -75,22 +67,11 @@ namespace NaughtsAndCrosses
                 return true;
             }
             stop = 0;
-            string[] split = choice.Split(',');
-            if(split.Length < 2)
-            {
-                return false;
-            }
-            if(!int.TryParse(split[1].Trim(), out int row)) {
-                return false;
-            } 
-            if (!int.TryParse(split[0].Trim(), out int col))
-            {
-                return false;
-            }
-            if(!(0 < row && row <= _size && 0 < col && col <= _size))
-            {
-                return false;
-            }
+            var split = choice.Split(',');
+            if(split.Length < 2) return false;
+            if (!int.TryParse(split[1].Trim(), out int row)) return false;
+            if (!int.TryParse(split[0].Trim(), out int col)) return false;
+            if(!(0 < row && row <= _size && 0 < col && col <= _size)) return false;
             row--;
             col--;
             var bidding = _board[row * _size + col];
@@ -102,39 +83,25 @@ namespace NaughtsAndCrosses
             Console.WriteLine("That box is taken.");
             return false;
         }
-
         // size must be a factor of board.Length
         private static void WriteBoard()
         {
             Console.Clear();
             Console.WriteLine("Type s to skip, r to restart or q to quit.\n");
             var spacer = new string('-', _size * 4 + 2);
-            for(var i = 1; i <= _size; i++)
-            {
-                Console.Write("---" + i);
-            }
+            for(var i = 1; i <= _size; i++) Console.Write("---" + i);
             Console.Write("--\n");
-            for(int i = 0; i < _size; i++)
+            for(var i = 0; i < _size; i++)
             {
                 var line = i + 1 + "|";
-                for(int j = 0; j < _size; j++)
-                {
-                    line += " " + GetChar(_board[i * _size + j]) + " |";
-                }
+                for(int j = 0; j < _size; j++) line += " " + GetChar(_board[i * _size + j]) + " |";
                 Console.WriteLine(line);
                 Console.WriteLine(spacer);
             }
         }
         private static char GetChar(int n)
         {
-            switch(n)
-            {
-                case 1:
-                    return 'O';
-                case 2:
-                    return 'X';
-            }
-            return ' ';
+            return n == 1 ? 'O' : n == 2 ? 'X' : ' ';
         }
         private static char GetPlayer(int current)
         {
@@ -151,11 +118,13 @@ namespace NaughtsAndCrosses
                     verticalSquares.Add(_board[i + col * _size]);
                     horizontalSquares.Add(_board[(i * _size) + col]);
                 }
+
                 if (SquaresMatch(horizontalSquares.ToArray()) && CheckForPlayer(horizontalSquares[0]))
                 {
                     winner = horizontalSquares[0];
+                    return;
                 }
-                else if (SquaresMatch(verticalSquares.ToArray()) && CheckForPlayer(verticalSquares[0]))
+                if (SquaresMatch(verticalSquares.ToArray()) && CheckForPlayer(verticalSquares[0]))
                 {
                     winner = verticalSquares[0];
                     return;
@@ -172,10 +141,7 @@ namespace NaughtsAndCrosses
                 return;
             }
             squaresFromDiagonal = new List<int>();
-            for (int i = _size - 1; i <= _size * (_size - 1); i += (_size - 1))
-            {
-                squaresFromDiagonal.Add(_board[i]);
-            }
+            for (var i = _size - 1; i <= _size * (_size - 1); i += _size - 1) squaresFromDiagonal.Add(_board[i]);
             if (SquaresMatch(squaresFromDiagonal.ToArray()) && squaresFromDiagonal.TrueForAll(CheckForPlayer))
             {
                 winner = squaresFromDiagonal[0];
@@ -205,10 +171,7 @@ namespace NaughtsAndCrosses
         private static int[] Empty()
         {
             var list = new List<int>();
-            for(var i = 0; i < _size * _size; i++)
-            {
-                list.Add(GetChar(0));
-            }
+            for(var i = 0; i < _size * _size; i++) list.Add(GetChar(0));
             return list.ToArray();
         }
     }
