@@ -52,11 +52,15 @@ namespace NaughtsAndCrosses
                 }
             } while (playAgain);
         }
-        private static void SetSize()
+        private static void ClearConsole()
         {
             Console.Clear();
-            Console.WriteLine("Naughts and Crosses v" + Version
-                              + "\nChoose board size (default 3, min. 3, max 9):");
+            Console.WriteLine("Naughts and Crosses v" + Version + " by Nick. Website: https://nsgwick.com/coding/projects/#naughts-crosses");
+        }
+        private static void SetSize()
+        {
+            ClearConsole();
+            Console.WriteLine("Choose board size (default 3, min. 3, max 9):");
             _size = !int.TryParse(Console.ReadLine(), out _size) ? 3 : _size > 9 ? 9 : _size < 3 ? 3 : _size;
         }
         private static bool ProcessChoice(int player, string choice, out int stop)
@@ -95,7 +99,7 @@ namespace NaughtsAndCrosses
         }
         private static void WriteBoard()
         {
-            Console.Clear();
+            ClearConsole();
             Console.WriteLine("Type s to skip, r to restart or q to quit.\n");
             var spacer = new string('-', _size * 4 + 2);
             for(var i = 1; i <= _size; i++) Console.Write("---" + i);
