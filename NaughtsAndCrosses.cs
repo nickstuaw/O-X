@@ -1,5 +1,5 @@
 // Written by Nick. https//www.github.com/nsgwick/
-
+// Version 1.0.0
 using System;
 using System.Collections.Generic;
 
@@ -8,6 +8,7 @@ namespace NaughtsAndCrosses
 {
     class Program
     {
+        private const string Version = "1.0.0";
         private static int[] _board;
         private static int _size;
         private static void Main(string[] args)
@@ -22,7 +23,7 @@ namespace NaughtsAndCrosses
                 {
                     WriteBoard();
                     Console.WriteLine("Turn: " + GetChar(current));
-                    Console.WriteLine("Column, row (layout: n,n. E.g. 1,2)");
+                    Console.WriteLine("Column, row (layout: x,y. E.g. 1,2)");
                     var choice = Console.ReadLine();
                     while (!ProcessChoice(current, choice, out stop))
                     {
@@ -38,15 +39,24 @@ namespace NaughtsAndCrosses
                 else
                 {
                     WriteBoard();
-                    Console.WriteLine(won == 0 ? "Draw!" : "The winner is player #" + won + " (" + GetPlayer(won) + ")!");
+                    Console.WriteLine(won == 0 ? "Draw!" : "The winner is player #" + won 
+                        + " (" + GetPlayer(won) + ")!");
                     Console.WriteLine("Do you want to play again? (y/n...)");
-                    playAgain = Console.ReadKey().KeyChar == 'y';
+                    ConsoleKey play;
+                    do
+                    {
+                        play = Console.ReadKey().Key;
+                    } while (!(play == ConsoleKey.Y || play == ConsoleKey.N));
+
+                    playAgain = play == ConsoleKey.Y;
                 }
             } while (playAgain);
         }
         private static void SetSize()
         {
-            Console.WriteLine("Choose board size (default 3, min. 3, max 9):");
+            Console.Clear();
+            Console.WriteLine("Naughts and Crosses v" + Version
+                              + "\nChoose board size (default 3, min. 3, max 9):");
             _size = !int.TryParse(Console.ReadLine(), out _size) ? 3 : _size > 9 ? 9 : _size < 3 ? 3 : _size;
         }
         private static bool ProcessChoice(int player, string choice, out int stop)
@@ -83,7 +93,6 @@ namespace NaughtsAndCrosses
             Console.WriteLine("That box is taken.");
             return false;
         }
-        // size must be a factor of board.Length
         private static void WriteBoard()
         {
             Console.Clear();
